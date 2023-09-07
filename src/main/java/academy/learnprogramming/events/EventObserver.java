@@ -2,17 +2,13 @@ package academy.learnprogramming.events;
 
 import academy.learnprogramming.annotations.Admin;
 import academy.learnprogramming.annotations.PopularStand;
-import com.sun.xml.internal.fastinfoset.Encoder;
 
-import javax.annotation.Priority;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.event.ObservesAsync;
 import javax.enterprise.event.Reception;
 import javax.enterprise.event.TransactionPhase;
 import javax.inject.Inject;
-import javax.interceptor.Interceptor;
-import javax.ws.rs.Priorities;
 import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
