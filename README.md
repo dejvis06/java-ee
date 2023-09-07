@@ -1,6 +1,6 @@
-# Build
-mvn clean package && docker build -t org.example/java-ee .
+# Java Enterprise Edition CDI 2.0
+Code from [udemy course](https://www.udemy.com/course/java-enterprise-edition-8/)
 
-# RUN
+## Build and Run
+Use the file _./buildAndRun.sh_ and check out the flow.
 
-docker rm -f java-ee || true && docker run -d -p 8080:8080 -p 4848:4848 --name java-ee org.example/java-ee 
