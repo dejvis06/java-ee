@@ -55,7 +55,7 @@ Possible values:
 
 **Note**: The default value is `annotated`, so if you don’t include this `beans.xml` file, the annotated bean discovery mode will be active.
 
-#### Qualifiers
+### Qualifiers
 
 `@Qualifier` is a CDI annotation that is used to create custom qualifiers to distinguish between different implementations of a bean type.
 Check out the `com.example.cdi.beans.salute.qualifiers` package, example:
@@ -109,3 +109,6 @@ public class Soldier implements Salute {
 @ServiceMan(value = ServiceMan.ServiceType.SOLDIER)
 private Salute soldierSalute;
 ```
+
+After running the app in docker you can click this link to open the qualifier.xhtml: [Qualifier Page](http://localhost:8080/java-ee-0.0.1-SNAPSHOT/qualifier.xhtml)
+and check the runtime implementations.
