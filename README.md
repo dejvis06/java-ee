@@ -4,8 +4,13 @@
 
 Execute buildAndRun.sh, it has the following content:
 ```shell
-mvn clean package && docker build -t java-ee .
-docker rm -f java-ee || true && docker run -d -p 8080:8080 -p 4848:4848 --name java-ee com.example/java-ee
+mvn clean install && docker build -t com.example/java-ee .
+docker run -p 8080:8080 -p 4848:4848 --name java-ee com.example/java-ee
+```
+and it goes along with a Dockerfile:
+```docker
+FROM glassfish
+COPY ./target/java-ee-0.0.1-SNAPSHOT.war /usr/local/glassfish4/glassfish/domains/domain1/autodeploy
 ```
 
 ## GlassFish Server
