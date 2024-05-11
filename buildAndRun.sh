@@ -1,3 +1,3 @@
 #!/bin/sh
-mvn clean package && docker build -t com.example/java-ee .
-docker rm -f java-ee || true && docker run -d -p 8080:8080 -p 4848:4848 --name java-ee com.example/java-ee 
+mvn clean package && docker build -t java-ee .
+docker rm -f java-ee || true && docker run -p 8080:8080 -p 4848:4848 --name java-ee com.example/java-ee
