@@ -13,6 +13,8 @@ FROM glassfish
 COPY ./target/java-ee-0.0.1-SNAPSHOT.war /usr/local/glassfish4/glassfish/domains/domain1/autodeploy
 ```
 
+After running you can click on this link [Main page](http://localhost:8080/java-ee-0.0.1-SNAPSHOT/) (check out the jsf files under webapp)
+
 ## GlassFish Server
 
 To use Java EE specifications the following dependency must be included:
@@ -115,5 +117,7 @@ public class Soldier implements Salute {
 private Salute soldierSalute;
 ```
 
-After running the app in docker you can click this link to open the qualifier.xhtml: [Qualifier Page](http://localhost:8080/java-ee-0.0.1-SNAPSHOT/qualifier.xhtml)
-and check the runtime implementations.
+After running the app in docker you can click these link to check out the runtime implementations:
+- [qualifier.xhtml](http://localhost:8080/java-ee-0.0.1-SNAPSHOT/qualifier.xhtml)
+- [qualifier-with-value.xhtml](http://localhost:8080/java-ee-0.0.1-SNAPSHOT/qualifier-with-value.xhtml)
+ 
