@@ -1,0 +1,113 @@
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+
+# Compiled Object files
+*.o
+*.so
+*.dll
+
+# Packages
+*.jar
+*.war
+*.ear
+
+# Logs and temp files
+*.log
+*.tmp
+*.out
+*.pid
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDEs and Editors
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# VS Code
+.vscode/
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# Gradle
+.gradle/
+build/
+
+# Other build system files
+!build.gradle
+!settings.gradle
+!gradlew
+!gradlew.bat
+
+# Generated files
+*.bak
+*.swp
+*.swo
+*.orig
+
+# Dependency directories
+node_modules/
+bower_components/
+
+# Application specific
+logs/
+*.log
+*.sql
+*.sqlite
+
+# Miscellaneous
+*.env
+*.bak
+*.tmp
+
+# JavaEE specific
+lib/
+deploy/
+temp/
+work/
+
+# IntelliJ IDEA
+*.ipr
+*.iws
+.idea/
+.idea/*
+!.idea/assetWizardData/
+!.idea/fileTemplates/
+!.idea/fileTemplates/*
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# STS
+.springBeans
