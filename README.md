@@ -1,5 +1,12 @@
 # Java EE 8
 
+- [Docker, Build & Run](#docker-build--run)
+- [GlassFish Server](#glassfish-server)
+- [CDI](#cdi)
+    - [Understanding `beans.xml` Configuration](#understanding-beansxml-configuration)
+        - [`bean-discovery-mode`](#bean-discovery-mode)
+    - [Qualifiers](#qualifiers)
+
 ## Docker, Build & Run
 
 Execute buildAndRun.sh, it has the following content:
