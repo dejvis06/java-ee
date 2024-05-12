@@ -6,6 +6,8 @@
     - [Understanding `beans.xml` Configuration](#understanding-beansxml-configuration)
         - [`bean-discovery-mode`](#bean-discovery-mode)
     - [Qualifiers](#qualifiers)
+    - [Stereotypes](#stereotypes)
+    - [Scopes](#scopes)
 
 ## Docker, Build & Run
 
@@ -128,3 +130,28 @@ After running the app in docker you can click these link to check out the runtim
 - [qualifier.xhtml](http://localhost:8080/java-ee-0.0.1-SNAPSHOT/qualifier.xhtml)
 - [qualifier-with-value.xhtml](http://localhost:8080/java-ee-0.0.1-SNAPSHOT/qualifier-with-value.xhtml)
  
+### Stereotypes
+
+Custom annotation used in Qualifier beans:
+```java
+@Stereotype
+@RequestScoped
+@Named
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface Web {
+}
+```
+- **`@Stereotype`**: used for semantics, may be useful when its taken under consideration by other tools, such as documentation tools etc..
+- **`@RequestScoped`**: bean lifecycle
+- **`@Named`**: bean type registered in the CDI for JSF usage
+
+### Scopes
+
+- **`@RequestScoped`**: lifecycle tied to a single HTTP request
+- **`@SessionScoped`**: lifecycle tied to http session
+- **`@ApplicationScoped`**: lifecycle tied to the application lifecycle
+- **`@Dependent`**: lifecycle depends on the bean it is injected into
+
+Run the app, click on this link:  [scopes.xhtml](http://localhost:8080/java-ee-0.0.1-SNAPSHOT/scopes.xhtml) and check the hashcode generated for each bean scope type.
+
