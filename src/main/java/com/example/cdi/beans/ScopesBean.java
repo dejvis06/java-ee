@@ -1,6 +1,5 @@
 package com.example.cdi.beans;
 
-import com.example.cdi.beans.producers.LoggerProducer;
 import com.example.cdi.beans.types.Web;
 import com.example.cdi.beans.scopes.ApplicationScope;
 import com.example.cdi.beans.scopes.DependentScope;
@@ -27,19 +26,21 @@ public class ScopesBean implements Serializable {
     private SessionScope sessionScope;
     @Inject
     private DependentScope dependentScope;
+    @Inject
+    private AuditedService auditedService;
 
-    //Lifecyle callback
     @PostConstruct
     private void init() {
+        auditedService.auditedMethod();
         logger.log(Level.INFO, "*******************************************");
-        logger.log(Level.INFO, "Scopes bean called");
+        logger.log(Level.INFO, "Scopes bean constructed");
         logger.log(Level.INFO, "********************************************");
     }
 
     @PreDestroy
     private void kill() {
         logger.log(Level.INFO, "*******************************************");
-        logger.log(Level.INFO, "Scopes bean gonna be killed :-( ");
+        logger.log(Level.INFO, "Scopes bean gonna be destroyed");
         logger.log(Level.INFO, "********************************************");
     }
 
@@ -58,5 +59,4 @@ public class ScopesBean implements Serializable {
     public String dependentScopeHashCode() {
         return dependentScope.getHashCode();
     }
-
 }

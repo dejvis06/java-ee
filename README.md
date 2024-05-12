@@ -9,6 +9,7 @@
     - [Stereotypes](#stereotypes)
     - [Scopes](#scopes)
     - [Producers](#producers)
+    - [Interceptors](#interceptors)
 
 ## Docker, Build & Run
 
@@ -193,3 +194,50 @@ public void close(@Disposes @UserDatabase EntityManager em) {
 
 The disposing happens based on the lifecycle of the bean where it is injected.
 
+### Interceptors
+Interceptors are components that allow you to intercept and add behavior to method calls or lifecycle events.
+
+First a `@InterceptorBinding` annotation type is created:
+```java
+@InterceptorBinding
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.TYPE})
+@Inherited
+public @interface Logged {
+}
+```
+
+Then an interceptor binding to the above mentioned annotation:
+```java
+@Logged
+@Interceptor
+@Priority(Interceptor.Priority.APPLICATION)
+public class LoggedInterceptor {
+
+    @Inject
+    private Logger logger;
+
+    @AroundInvoke
+    public Object logMethodCall(InvocationContext context) throws Exception {
+        try {
+            return context.proceed(); // Proceed with method invocation
+        } finally {
+            // log after proceeding with method invocation
+            logger.log(Level.INFO, "Intercepting method {0}", context.getMethod().getName());
+        }
+    }
+}
+```
+The `@AroundInvoke` annotation is used by the CDI to handle the interception and continue with the method invocation.
+In this example we first proceed with the method invocation and then do the custom interception logic (_before invocation_), but it can be handled in the reverse case (_after invocation_).
+
+The final piece of the flow is annotating with our custom `@InterceptorBinding` annotation type the method we want to intercept:
+```java
+// AuditedService.java
+@Logged // mark for interception
+public void auditedMethod() {
+    logger.log(Level.INFO, "Auditing...");
+}
+```
+
+During the invocation of this method, the CDI checks for any `@Interceptor` bean which is annotated also with the `@Logged` annotation and then proceeds with the flow.
