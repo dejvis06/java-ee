@@ -8,6 +8,7 @@
     - [Qualifiers](#qualifiers)
     - [Stereotypes](#stereotypes)
     - [Scopes](#scopes)
+    - [Producers](#producers)
 
 ## Docker, Build & Run
 
@@ -154,4 +155,41 @@ public @interface Web {
 - **`@Dependent`**: lifecycle depends on the bean it is injected into
 
 Run the app, click on this link:  [scopes.xhtml](http://localhost:8080/java-ee-0.0.1-SNAPSHOT/scopes.xhtml) and check the hashcode generated for each bean scope type.
+
+### Producers
+
+Producing types during CDI scanning and injection: (producing through method example)
+```java
+@Singleton
+public class LoggerProducer {
+
+    @Produces
+    // Defaults to dependent
+    public Logger produceLogger(InjectionPoint injectionPoint) {
+        return Logger.getLogger(injectionPoint.getMember().getDeclaringClass().getName());
+    }
+}
+
+// ScopesBean.java
+@Inject
+private Logger logger;
+```
+
+There can also be production through fields, also disposing of produced types:
+```java
+
+// produce through field
+@Produces
+        ...
+         ...
+@PersistenceContext
+private EntityManager em;
+
+// dispose
+public void close(@Disposes @UserDatabase EntityManager em) {
+    em.close();
+}
+```
+
+The disposing happens based on the lifecycle of the bean where it is injected.
 
