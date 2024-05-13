@@ -10,6 +10,11 @@
     - [Scopes](#scopes)
     - [Producers](#producers)
     - [Interceptors](#interceptors)
+    - [Events](#events)
+      - [Plain Events](#plain-events-no-qualifiers)
+      - [Qualifier Events](#qualifier-events)
+      - [Priority Events](#priority-events)
+      - [Async Events](#async-events)
 
 ## Docker, Build & Run
 
@@ -241,3 +246,78 @@ public void auditedMethod() {
 ```
 
 During the invocation of this method, the CDI checks for any `@Interceptor` bean which is annotated also with the `@Logged` annotation and then proceeds with the flow.
+
+### Events
+
+Check out `EventBean.java` and follow the flow. There are multiple types of events that will be explaned below. <br>
+Check the runtime logs: [Login Page](http://localhost:8080/java-ee-0.0.1-SNAPSHOT/login.xhtml)
+
+#### Plain events (no qualifiers)
+
+```java
+@Inject
+Event<EventData> plainEvent;
+
+plainEvent.fire(new EventData(user.getEmail(), LocalDateTime.now()));
+```
+
+EventData.java is a custom class that is used when firing an event. The events are handled by observers:
+```java
+  // EventObserver.java  
+  void plainEvent(@Observes EventData eventData) {
+    logger.log(Level.INFO, "User {0} logged in at {1}. Logged from plain event observer",
+            new Object[]{eventData.getEmail(), eventData.getLoginTime()});
+  }
+```
+
+#### Qualifier Events
+
+```java
+@Inject
+@PopularStand
+private Event<EventData> eventDataEvent;
+
+eventDataEvent.fire(new EventData(user.getEmail(), LocalDateTime.now()));
+
+// EventObserver.java  
+void userLoggedIn(@Observes @PopularStand EventData eventData) {
+  logger.log(Level.INFO, "User {0} logged in at {1}. Logged from qualified observer",
+          new Object[]{eventData.getEmail(), eventData.getLoginTime()});
+}
+```
+Notice the qualifier `@PopularStand`, both in the injection and after configuring the observer for a particular type.
+
+#### Priority Events
+
+Events can be triggered in turns based on priorities: (check out the `EventPriority.java`)
+```java
+void greetingReceiver1(@Observes @Priority(Interceptor.Priority.APPLICATION + 200) String greeting) {
+  logger.log(Level.INFO, "Greeting 1 with lower priority invoked with message " + greeting + "1");
+}
+
+//Higher priority
+void greetingReceiver2(@Observes @Priority(Interceptor.Priority.APPLICATION) String greeting) {
+  logger.log(Level.INFO, "Greeting 2 with higher priority invoked with message " + greeting + "2");
+}
+```
+
+#### Async Events
+
+Non blocking when firing events, return type is  CompletionStage<T> which can optionally be handled: (the same event publisher is used as in the qualifier case)
+
+```java
+
+// notice the fireAsync method
+CompletionStage<EventData> fireAsync = eventDataEvent.fireAsync(new EventData(user.getEmail(), LocalDateTime.now()));
+
+// simulating delay
+void asyncObserver(@ObservesAsync @PopularStand EventData eventData) {
+  try {
+    Thread.sleep(6000);
+    logger.log(Level.INFO, "User {0} logged in at {1}. Logged from async observer",
+            new Object[]{eventData.getEmail(), eventData.getLoginTime()});
+  } catch (InterruptedException e) {
+    logger.log(Level.SEVERE, null, e);
+  }
+}
+```
