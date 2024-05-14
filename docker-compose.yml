@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  java-ee:
+    image: payara/server-full:5.2021.1
+    container_name: java-ee
+    ports:
+      - "8080:8080"
+      - "3700:3700"
+      - "4848:4848"
+    depends_on:
+      - postgres
+    volumes:
+      #- ./domain.xml:/opt/payara/appserver/glassfish/domains/domain1/config/domain.xml
+      - ./configScript.sh:/opt/payara/configScript.sh
+      - ./passwordfile:/opt/payara/passwordfile
+      - ./postgresql-42.2.18.jar:/opt/payara/appserver/glassfish/domains/domain1/lib/postgresql-42.2.18.jar
+      - ./target/java-ee-0.0.1-SNAPSHOT.war:/opt/payara/deployments/java-ee-0.0.1-SNAPSHOT.war
+    entrypoint: ["/bin/sh", "-c", "chmod +x /opt/payara/configScript.sh && /opt/payara/configScript.sh"]
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  postgres_data:

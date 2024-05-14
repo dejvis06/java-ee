@@ -2,6 +2,7 @@
 
 - [Docker, Build & Run](#docker-build--run)
 - [GlassFish Server](#glassfish-server)
+- [Payara Server](#payara-server)
 - [CDI](#cdi)
     - [Understanding `beans.xml` Configuration](#understanding-beansxml-configuration)
         - [`bean-discovery-mode`](#bean-discovery-mode)
@@ -15,21 +16,31 @@
       - [Qualifier Events](#qualifier-events)
       - [Priority Events](#priority-events)
       - [Async Events](#async-events)
+- [JPA](#jpa)
+    - [`persistence.xml`](#persistencexml)
+    - [Connections Pool](#connections-pool)
+        - [File Configurations](#file-configurations)
+        - [Script Init](#script-init)
+
 
 ## Docker, Build & Run
+After running you can click on this link [Main page](http://localhost:8080/java-ee-0.0.1-SNAPSHOT/) (check out the jsf files under webapp)
+
+### Application server container
 
 Execute buildAndRun.sh, it has the following content:
 ```shell
 mvn clean install && docker build -t com.example/java-ee .
 docker run -p 8080:8080 -p 4848:4848 --name java-ee com.example/java-ee
 ```
-and it goes along with a Dockerfile:
+and it goes along with the Dockerfile:
 ```docker
 FROM glassfish
 COPY ./target/java-ee-0.0.1-SNAPSHOT.war /usr/local/glassfish4/glassfish/domains/domain1/autodeploy
 ```
 
-After running you can click on this link [Main page](http://localhost:8080/java-ee-0.0.1-SNAPSHOT/) (check out the jsf files under webapp)
+### With Postgresql container
+Check out the docker-compose.yml, do a mvn clean package when necessary and use docker-compose up.
 
 ## GlassFish Server
 
@@ -53,6 +64,12 @@ In this case the scope is: `<scope>provided</scope>` because the Glassfish runti
 - **Java Transaction API (JTA)**: For managing transactions.
 - **Java API for WebSocket**: For WebSocket communication.
 - **Bean Validation**: For validating JavaBeans.
+
+## Payara Server
+Just like the glassfish server, payara offers support for the java ee specifications, but some or most of them may be updated versions. <br>
+Specifically, the reason why the application server has been changed is because of the need for the CDI 2.0 specification support used in the [Events](#events) examples. <br>
+In the beginning the _payara-micro_ version was used,
+but later it was replaced with the _payara/server-full:5.2021.1_ because of the need to manage the JNDI-db-configuration through the _domain.xml_ file: [JPA](#jpa).
 
 ## CDI
 
@@ -320,4 +337,95 @@ void asyncObserver(@ObservesAsync @PopularStand EventData eventData) {
     logger.log(Level.SEVERE, null, e);
   }
 }
+```
+
+### JPA
+
+This section will provide both the JPA connection configurations, and the application server jdbc connections pool.
+
+#### `persistence.xml`
+
+The file looks like below, the traditional path is: under _resources/META-INF/persistence.xml_
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+    <persistence-unit name="postgres" transaction-type="JTA">
+        <jta-data-source>jdbc/postgresDataSource</jta-data-source> <!-- Specify the JNDI name of the datasource -->
+        <properties>
+            ...
+             ...
+        </properties>
+    </persistence-unit>
+</persistence>
+```
+As you can see, under the persistence-unit tag there is a jta-data-source which holds the value of the JNDI. <br>
+This JNDI is further configured in the payara application server, with properties like database name, username password etc.. <br>
+
+The JNDI used in this case is a custom created one, but you can always use the default JNDI's that payara offers like below:
+```xml
+<!--  default payara jndi:  -->
+<persistence-unit name="default" transaction-type="JTA">
+        <jta-data-source>java:comp/DefaultDataSource</jta-data-source>
+```
+This is a h2 connection type.
+
+#### Connections Pool
+
+##### File configurations
+The connections pool is managed in the payara admin console: [Payara Admin Console](http://localhost:4848/console) _(default credentials are admin:admin)_ <br>
+The _domain.xml_ file is manipulated after adding a jdbc resource or connection pool through the interface, but in this case I just followed the pattern of the DefaultDataSource
+and added the tags manually since I am running in a dockerized environment and I needed everything to be set-up beforehand. <br>
+
+Required tags:
+```xml
+<!-- add postgres configs -->
+<jdbc-resource enabled="true" jndi-name="jdbc/postgresDataSource" pool-name="PostgresPool"></jdbc-resource>
+
+<!-- add postgres configs -->
+<jdbc-connection-pool name="PostgresPool" datasource-classname="org.postgresql.ds.PGSimpleDataSource" res-type="javax.sql.DataSource">
+    <property name="ServerName" value="postgres"/>
+    <property name="PortNumber" value="5432"/>
+    <property name="DatabaseName" value="postgres"/>
+    <property name="User" value="postgres"/>
+    <property name="Password" value="postgres"/>
+    <property name="URL" value="jdbc:postgresql://postgres:5432/postgres"/>
+</jdbc-connection-pool>
+
+<servers>
+    <server config-ref="server-config" name="server">
+        ...
+         ...
+        <resource-ref ref="jdbc/postgresDataSource"></resource-ref>
+          ...
+```
+
+This file overwrites the existing one in the payara-server by using docker volumes:
+```docker
+    volumes:
+      - ./domain.xml:/opt/payara/appserver/glassfish/domains/domain1/config/domain.xml
+      - ./postgresql-42.2.18.jar:/opt/payara/appserver/glassfish/domains/domain1/lib/postgresql-42.2.18.jar
+```
+The postgresql-42.2.18.jar can be updated with a newer version, but it is necessary for the .java classes to establish the postgres connection:
+
+```xml
+...
+ ...
+<jdbc-connection-pool ... datasource-classname="org.postgresql.ds.PGSimpleDataSource" ...
+  ...
+   ...
+```
+
+##### Script Init
+Another way is through config scripts, such as the `configScript.sh`. <br>
+The comments inside the script file will serve as a guide, but the idea is to not use file configs, rather initialize the JNDI configurations through payara commands.
+
+In the docker-compose we have map the script and execute it:
+```yaml
+    volumes:
+      #- ./domain.xml:/opt/payara/appserver/glassfish/domains/domain1/config/domain.xml
+      - ./configScript.sh:/opt/payara/configScript.sh
+      - ./passwordfile:/opt/payara/passwordfile
+      - ./postgresql-42.2.18.jar:/opt/payara/appserver/glassfish/domains/domain1/lib/postgresql-42.2.18.jar
+      - ./target/java-ee-0.0.1-SNAPSHOT.war:/opt/payara/deployments/java-ee-0.0.1-SNAPSHOT.war
+    entrypoint: ["/bin/sh", "-c", "chmod +x /opt/payara/configScript.sh && /opt/payara/configScript.sh"]
 ```
