@@ -419,7 +419,7 @@ The postgresql-42.2.18.jar can be updated with a newer version, but it is necess
 Another way is through config scripts, such as the `configScript.sh`. <br>
 The comments inside the script file will serve as a guide, but the idea is to not use file configs, rather initialize the JNDI configurations through payara commands.
 
-In the docker-compose we have map the script and execute it:
+In the docker-compose we have to map the script and execute it:
 ```yaml
     volumes:
       #- ./domain.xml:/opt/payara/appserver/glassfish/domains/domain1/config/domain.xml
