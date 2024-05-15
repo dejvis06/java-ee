@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
-import java.time.LocalDate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
